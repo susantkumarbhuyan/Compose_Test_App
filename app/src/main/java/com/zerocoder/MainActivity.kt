@@ -3,113 +3,77 @@ package com.zerocoder
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarColors
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.zerocoder.api.TweetsyAPI
+import com.zerocoder.screens.CategoryScreen
+import com.zerocoder.screens.DetailsScreen
+import com.zerocoder.ui.theme.Compose_Test_AppTheme
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    @Inject
+    lateinit var tweetsyAPI: TweetsyAPI
 
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         setContent {
-            GreetingPreview();
-        }
-    }
-}
+            Compose_Test_AppTheme {
+                Scaffold(
+                    topBar = {
+                        TopAppBar(
+                            title = {
+                                Text(text = "Tweetsy")
+                            },
+                            colors = TopAppBarDefaults.mediumTopAppBarColors(
+                                containerColor = Color.Black,
+                                titleContentColor = Color.White
+                            )
+                        )
+                    }
+                ) {
+                    Box(modifier = Modifier.padding(it)) {
+                        App()
+                    }
+                }
 
-
-@Composable
-fun ContactComponent(image: Int, name: String, occupation: String) {
-    Card(
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-        colors = CardDefaults.cardColors(Color.Magenta),
-        modifier = Modifier
-            .padding(8.dp)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .padding(8.dp)
-        ) {
-            Image(
-                painter = painterResource(id = image),
-                contentDescription = "images",
-                modifier = Modifier
-                    .size(48.dp)
-                    .padding(8.dp)
-                    .weight(.2f)
-            )
-            ItemDescription(name, occupation, Modifier.weight(.8f))
+            }
         }
     }
 }
 
 @Composable
-private fun ItemDescription(name: String, occupation: String, modifier: Modifier) {
-    Column(modifier = modifier) {
-        Text(
-            text = name,
-            fontSize = 15.sp,
-            style = MaterialTheme.typography.headlineMedium
-        )
-        Text(
-            text = occupation,
-            fontSize = 12.sp,
-            style = MaterialTheme.typography.bodySmall
-        )
-    }
-}
-
-@Preview(heightDp = 500)
-@Composable
-fun GreetingPreview() {
-    //For RecyclerView
-    LazyColumn(content = {
-        items(getCatList()) { item ->
-            ContactComponent(item.img, item.name, item.ocp)
+fun App() {
+    val navController = rememberNavController()
+    NavHost(navController = navController, startDestination = "category") {
+        composable(route = "category") {
+            CategoryScreen {
+                navController.navigate("details/$it")
+            }
         }
-    })
-    //BElow Code for Noramal Colum
-//    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-//        getCatList().map { item ->
-//            ContactComponent(item.img, item.name, item.ocp)
-//        }
-//    }
+        composable(route = "details/{category}", arguments = listOf(navArgument("category") {
+            type = NavType.StringType
+        })) {
+            DetailsScreen()
+        }
+    }
 
 }
 
-data class Category(val img: Int, val name: String, val ocp: String)
-
-fun getCatList(): List<Category> {
-    val list = mutableListOf<Category>()
-    list.add(Category(R.drawable.man, "Susant", "JavaDeveloper"))
-    list.add(Category(R.drawable.man, "Suresh", "JavaDeveloper"))
-    list.add(Category(R.drawable.man, "Hari", "JavaDeveloper"))
-    list.add(Category(R.drawable.man, "Saniya", "JavaDeveloper"))
-    list.add(Category(R.drawable.man, "Susant", "JavaDeveloper"))
-    list.add(Category(R.drawable.man, "Suresh", "JavaDeveloper"))
-    list.add(Category(R.drawable.man, "Hari", "JavaDeveloper"))
-    list.add(Category(R.drawable.man, "Saniya", "JavaDeveloper"))
-    list.add(Category(R.drawable.man, "Susant", "JavaDeveloper"))
-    list.add(Category(R.drawable.man, "Suresh", "JavaDeveloper"))
-    list.add(Category(R.drawable.man, "Hari", "JavaDeveloper"))
-    list.add(Category(R.drawable.man, "Saniya", "JavaDeveloper"))
-    return list
-}
